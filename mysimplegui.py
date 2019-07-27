@@ -70,7 +70,8 @@ class ListboxWithSearch:
                 self._selected.discard(el)
             self._selected.update(selected)
         elif self._el.SelectMode == 'single':
-            self._selected = set(selected)
+            if len(selected) > 0:
+                self._selected = set(selected)
         else:
             raise ValueError(self._el.SelectMode,
                              'expected "single" or "multiple"')
