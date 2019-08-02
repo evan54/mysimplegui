@@ -4,9 +4,13 @@ import re
 
 class ListboxWithSearch:
 
-    def __init__(self, values, key=None, is_single_mode=True,
-                 size=(None, None), sort_fun=False):
-        select_mode = 'single' if is_single_mode else 'multiple'
+    def __init__(self, values, key=None, select_mode='single',
+                 size=(None, None), sort_fun=False, bind_return_key=False,
+                 is_single_mode=True):
+        if not is_single_mode:
+            select_mode = 'extended'
+            raise DeprecationWarning('is_single_mode is going to be deprecated'
+                                     ' use select_mode instead')
         self._key = key
         self._sort = sort_fun if sort_fun else lambda x: list(x)
         self._input_key = key + '_input'
@@ -20,7 +24,8 @@ class ListboxWithSearch:
                               size=self._initialise_size(size),
                               key=key,
                               select_mode=select_mode,
-                              default_values=[])
+                              default_values=[],
+                              bind_return_key=bind_return_key)
         self._i = sg.I(key=self._input_key, enable_events=True)
         buttons = []
         if not is_single_mode:
@@ -53,6 +58,7 @@ class ListboxWithSearch:
 
     def _update(self, values):
 
+        original_displayed = tuple(self._displayed)
         search_string = re.escape(values[self._input_key])
         selected = values[self._key]
 
@@ -64,10 +70,12 @@ class ListboxWithSearch:
             self._displayed = [s for s in self._values
                                if re.match(f'.*{search_string}.*', s, re.I)]
 
+        self._update_selection(selected, original_displayed)
+
+    def _update_selection(self, selected, original_displayed):
         # update selection
-        if self._el.SelectMode == 'multiple':
-            for el in self._displayed:
-                self._selected.discard(el)
+        if self._el.SelectMode in ['multiple', 'extended']:
+            self._selected = self._selected - set(original_displayed)
             self._selected.update(selected)
         elif self._el.SelectMode == 'single':
             if len(selected) > 0:
@@ -104,8 +112,13 @@ class ListboxWithSearch:
             self._selected = set(selected)
             self._el.SetValue(self._sort(selected))
 
-    def get_selected(self, values):
-        return values[self._el.Key]
+    def _clear_search(self, values):
+        selected = values[self._key]
+        original_displayed = tuple(self._displayed)
+        self._update_selection(selected, original_displayed)
+        self._i.Update(value='')
+        self._update({self._input_key: '',
+                      self._key: tuple(self._selected)})
 
     def manage_events(self, event, values):
         if event == self._select_all_key:
@@ -115,9 +128,7 @@ class ListboxWithSearch:
         elif event == self._input_key:
             self._update(values)
         elif event == self._clear_search_key:
-            self._i.Update(value='')
-            self._update({self._input_key: '',
-                          self._key: tuple(self._selected)})
+            self._clear_search(values)
 
 
 if __name__ == '__main__':
