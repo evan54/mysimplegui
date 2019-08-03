@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import re
+import warnings
 
 
 class ListboxWithSearch:
@@ -9,8 +10,8 @@ class ListboxWithSearch:
                  is_single_mode=True):
         if not is_single_mode:
             select_mode = 'extended'
-            raise DeprecationWarning('is_single_mode is going to be deprecated'
-                                     ' use select_mode instead')
+            warnings.warn('is_single_mode is going to be deprecated use '
+                          'select_mode instead', DeprecationWarning)
         self._key = key
         self._sort = sort_fun if sort_fun else lambda x: list(x)
         self._input_key = key + '_input'
@@ -28,7 +29,7 @@ class ListboxWithSearch:
                               bind_return_key=bind_return_key)
         self._i = sg.I(key=self._input_key, enable_events=True)
         buttons = []
-        if not is_single_mode:
+        if select_mode != 'single':
             buttons.append(sg.B('Select all', key=self._select_all_key))
         buttons.append(sg.B('Deselect all', key=self._deselect_all_key))
         buttons.append(sg.B('Clear search', key=self._clear_search_key))
@@ -48,6 +49,10 @@ class ListboxWithSearch:
     @property
     def _displayed(self):
         return self._displayed_secret
+
+    @property
+    def selected(self):
+        return tuple(self._selected)
 
     @_displayed.setter
     def _displayed(self, values):
@@ -129,6 +134,10 @@ class ListboxWithSearch:
             self._update(values)
         elif event == self._clear_search_key:
             self._clear_search(values)
+        else:
+            selected = values[self._key]
+            original_displayed = tuple(self._displayed)
+            self._update_selection(selected, original_displayed)
 
 
 if __name__ == '__main__':
