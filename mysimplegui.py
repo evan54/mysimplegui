@@ -134,6 +134,8 @@ class ListboxWithSearch:
             self._update(values)
         elif event == self._clear_search_key:
             self._clear_search(values)
+        elif event is None:
+            pass
         else:
             selected = values[self._key]
             original_displayed = tuple(self._displayed)
