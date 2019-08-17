@@ -38,6 +38,9 @@ class ListboxWithSearch:
             buttons,
             [self._el]])
 
+    def frame_layout(self, name):
+        return sg.Frame(name, layout=[[self.layout]])
+
     def _initialise_size(self, size):
         size = list(size)
         if size[0] is None and len(self._values) > 0:
