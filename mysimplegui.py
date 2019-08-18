@@ -158,6 +158,7 @@ def get_date():
     while True:
         event, values = win.Read()
         if event is None or event == 'Cancel':
+            win.Close()
             return
         if event == 'date':
             date = values[event][:10]  # keep only YYYY-MM-DD
