@@ -65,7 +65,7 @@ class ListboxWithSearch:
         self._el.Update(values=self._sort(self._displayed_secret),
                         set_to_index=0)
 
-    def _update(self, values):
+    def update(self, values):
 
         original_displayed = tuple(self._displayed)
         search_string = re.escape(values[self._input_key])
@@ -126,8 +126,8 @@ class ListboxWithSearch:
         original_displayed = tuple(self._displayed)
         self._update_selection(selected, original_displayed)
         self._i.Update(value='')
-        self._update({self._input_key: '',
-                      self._key: tuple(self._selected)})
+        self.update({self._input_key: '',
+                     self._key: tuple(self._selected)})
 
     def manage_events(self, event, values):
         if event == self._select_all_key:
@@ -135,7 +135,7 @@ class ListboxWithSearch:
         elif event == self._deselect_all_key:
             self._deselect_all_displayed()
         elif event == self._input_key:
-            self._update(values)
+            self.update(values)
         elif event == self._clear_search_key:
             self._clear_search(values)
         elif event is None:
@@ -146,14 +146,17 @@ class ListboxWithSearch:
             self._update_selection(selected, original_displayed)
 
 
-def get_date():
+def get_date(title=None):
+    if title is None:
+        title = 'Choose Date'
+
     layout = [
         [sg.Text('Enter Date (YYYY-MM-DD) format')],
         [sg.CalendarButton('Pick Date', target='date', key='cal_button'),
          sg.Input(key='date', enable_events=True)],
         [sg.Button('Ok'), sg.Button('Cancel')]
     ]
-    win = sg.Window('Choose Date', layout=layout)
+    win = sg.Window(title, layout=layout)
 
     while True:
         event, values = win.Read()
