@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 import re
 import warnings
+import pandas as pd
 
 
 class ListboxWithSearch:
@@ -143,6 +144,36 @@ class ListboxWithSearch:
             selected = values[self._key]
             original_displayed = tuple(self._displayed)
             self._update_selection(selected, original_displayed)
+
+
+def get_date():
+    layout = [
+        [sg.Text('Enter Date (YYYY-MM-DD) format')],
+        [sg.CalendarButton('Pick Date', target='date', key='cal_button'),
+         sg.Input(key='date', enable_events=True)],
+        [sg.Button('Ok'), sg.Button('Cancel')]
+    ]
+    win = sg.Window('Choose Date', layout=layout)
+
+    while True:
+        event, values = win.Read()
+        if event is None or event == 'Cancel':
+            return
+        if event == 'date':
+            date = values[event][:10]  # keep only YYYY-MM-DD
+            win.Element(event).Update(value=date)
+            try:
+                date = pd.Timestamp(date)
+                # Currently not supported
+                # win.Element('cal_button').Update(
+                #     default_date_m_d_y=(date.month, date.day, date.year))
+            except ValueError:
+                pass
+
+        elif event == 'Ok':
+            break
+    win.Close()
+    return pd.Timestamp(values['date']).to_pydatetime()
 
 
 if __name__ == '__main__':
