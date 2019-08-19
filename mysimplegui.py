@@ -180,6 +180,37 @@ def get_date(title=None):
     return pd.Timestamp(values['date']).to_pydatetime()
 
 
+def show_hidden_files_button(win):
+    """
+    To be used with layouts that include sg.FileBrowser, the purpose is to
+    allow hidden files to not be shown. Inspired from:
+        https://stackoverflow.com/a/54068050/1764089
+        and
+        https://github.com/PySimpleGUI/PySimpleGUI/issues/1830
+
+    example usecase:
+        import PySimpleGui as sg
+        win = sg.Window('Test', layout=[[sg.FileBrowser('Load file'),
+                                         sg.Button('ok')]])
+        show_hidden_files_button(win)
+        while True:
+            event, values = win.Read()
+            if event is None:
+                win.Close()
+                break
+    """
+    # set up TKroot
+    win.Read(timeout=0)
+
+    # from https://stackoverflow.com/a/54068050/1764089
+    try:
+        win.TKroot.tk.call('tk_getOpenFile', '-foobarbaz')
+    except sg.tk.TclError:
+        pass
+    win.TKroot.tk.call('set', '::tk::dialog::file::showHiddenBtn', '1')
+    win.TKroot.tk.call('set', '::tk::dialog::file::showHiddenVar', '0')
+
+
 if __name__ == '__main__':
 
     values = ['hello', 'hello world', 'my world', 'your wold', 'god']
