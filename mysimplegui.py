@@ -28,7 +28,14 @@ class ListboxWithSearch:
                               select_mode=select_mode,
                               default_values=[],
                               bind_return_key=bind_return_key)
-        self._i = sg.I(key=self._input_key, enable_events=True)
+        self._i = sg.I(key=self._input_key, enable_events=True,
+                       tooltip='''
+Start a string with = and everything after will be considered a regexp
+otherwise it will be a simple match:
+eg enter:
+    =.*world$
+vs entering
+    world''')
         buttons = []
         if select_mode != 'single':
             buttons.append(sg.B('Select all', key=self._select_all_key))
@@ -68,16 +75,21 @@ class ListboxWithSearch:
     def update(self, values):
 
         original_displayed = tuple(self._displayed)
-        search_string = re.escape(values[self._input_key])
+        if (len(values[self._input_key]) > 0 and
+            values[self._input_key][0] == '='):
+
+            search_string = values[self._input_key][1:]
+        else:
+            search_string = '.*' + re.escape(values[self._input_key]) + '.*'
         selected = values[self._key]
 
         # update displayed
         if isinstance(self._values, dict):
             self._displayed = {s: y for s, y in self._values.items()
-                               if re.match(f'.*{search_string}.*', s, re.I)}
+                               if re.match(search_string, s, re.I)}
         else:
             self._displayed = [s for s in self._values
-                               if re.match(f'.*{search_string}.*', s, re.I)]
+                               if re.match(search_string, s, re.I)]
 
         self._update_selection(selected, original_displayed)
 
