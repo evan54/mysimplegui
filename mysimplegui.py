@@ -75,21 +75,27 @@ vs entering
     def update(self, values):
 
         original_displayed = tuple(self._displayed)
-        if (len(values[self._input_key]) > 0 and
-            values[self._input_key][0] == '='):
+        is_regexp = not(len(values[self._input_key]) > 0 and
+                        values[self._input_key][0] == '=')
 
+        if not is_regexp:
             search_string = values[self._input_key][1:]
         else:
             search_string = '.*' + re.escape(values[self._input_key]) + '.*'
         selected = values[self._key]
 
+        def match_fun(s):
+            try:
+                return re.match(search_string, s, re.I)
+            except re.error:
+                return True
+
         # update displayed
         if isinstance(self._values, dict):
             self._displayed = {s: y for s, y in self._values.items()
-                               if re.match(search_string, s, re.I)}
+                               if match_fun(s)}
         else:
-            self._displayed = [s for s in self._values
-                               if re.match(search_string, s, re.I)]
+            self._displayed = [s for s in self._values if match_fun(s)]
 
         self._update_selection(selected, original_displayed)
 
