@@ -6,7 +6,7 @@ import pandas as pd
 
 class ListboxWithSearch:
 
-    def __init__(self, values, key=None, select_mode='single',
+    def __init__(self, values, key='', select_mode='single',
                  size=(None, None), sort_fun=False, bind_return_key=False,
                  is_single_mode=True):
         if not is_single_mode:
