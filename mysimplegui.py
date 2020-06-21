@@ -11,7 +11,7 @@ class ListboxWithSearch:
                  is_single_mode=True):
         if not is_single_mode:
             select_mode = 'extended'
-            warnings.warn('is_single_mode is going to be deprecated use '
+            warnings.warn('Ev: is_single_mode is going to be deprecated use '
                           'select_mode instead', DeprecationWarning)
         self._key = key
         self._sort = sort_fun if sort_fun else lambda x: list(x)
@@ -232,8 +232,8 @@ def show_hidden_files_button(win):
 if __name__ == '__main__':
 
     values = ['hello', 'hello world', 'my world', 'your wold', 'god']
-    listbox1 = ListboxWithSearch(values, 'mylistbox', is_single_mode=True)
-    listbox2 = ListboxWithSearch(values, 'mylistbox0', is_single_mode=False)
+    listbox1 = ListboxWithSearch(values, 'mylistbox')
+    listbox2 = ListboxWithSearch(values, 'mylistbox0', select_mode='extended')
     layout = [[listbox1.layout],
               [listbox2.layout]]
     win = sg.Window('test', layout=layout, resizable=True)
